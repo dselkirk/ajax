@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>AJAX and JSON</title>
+
+    <meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="bower_components/reveal.js/css/reveal.css">
+    <link rel="stylesheet" href="bower_components/reveal.js/css/theme/night.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="bower_components/reveal.js/lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+        document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="bower_components/reveal.js/lib/js/html5shiv.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+<div class="reveal">
+
+    <!-- Any section element inside of this container is displayed as a slide -->
+    <div class="slides">
+        <section>
+            <h1>AJAX And JSON</h1>
+
+            <p>
+                <small>
+                    Created by <a href="https://github.com/dselkirk" target="_blank">Dennis Selkirk</a><br/>
+                </small>
+            </p>
+        </section>
+        <section>
+            <h3>JSON - JavaScript Object Notation</h3>
+        </section>
+        <section>
+            <ul>
+                <li>JavaScript-объекты</li>
+                <li class="fragment">Массивы</li>
+                <li class="fragment">
+                    строки в двойных кавычках,
+                </li>
+                <li class="fragment">
+                    число,
+                </li>
+                <li class="fragment">
+                    логическое значение true/false,
+                </li>
+                <li class="fragment">
+                    null.
+                </li>
+            </ul>
+        </section>
+        <section>
+            <ul>
+                <li>JSON.parse
+                    <pre><code>
+var numbers = "[0, 1, 2, 3]";
+
+numbers = JSON.parse(numbers);
+
+console.log( numbers[1] ); // 1
+
+            </code></pre>
+                </li>
+
+                <li class="fragment">JSON.stringify
+                    <pre><code>
+var user = '{ "name": "Вася", "age": 35, "isAdmin": false, "friends": [0,1,2,3] }';
+
+user = JSON.parse(user);
+
+console.log( user.friends[1] ); // 1
+
+            </code></pre>
+                </li>
+            </ul>
+        </section>
+        <section>
+            <h3>JSON-объекты ≠ JavaScript-объекты</h3>
+            <pre><code>
+JSON.stringify({name: 'test'}) // "{"name":"test"}"
+            </code></pre>
+        </section>
+        <section>
+            <h3>Магия JSON.parse</h3>
+            <pre><code>
+var str = '{"title":"EPAM","date":"2016-08-02T12:00:00.000Z"}';
+
+var event = JSON.parse(str, function(key, value) {
+  if (key == 'date') return new Date(value);
+  return value;
+});
+
+console.log( event.date.getDate() );
+            </code></pre>
+        </section>
+        <section>
+            <h3>toJSON()</h3>
+            <pre><code>
+var room = {
+  number: 23,
+  occupy: function() {
+    alert( this.number );
+  }
+};
+
+event = {
+  title: "Конференция",
+  date: new Date(Date.UTC(2014, 0, 1)),
+  room: room
+};
+
+console.log( JSON.stringify(event) );
+/*
+  {
+    "title":"Конференция",
+    "date":"2014-01-01T00:00:00.000Z",  // дата превратилась в строку
+    "room": {"number":23}               // функция исчезла
+  }
+*/
+            </code></pre>
+        </section>
+
+        <section>
+            <h3>Исключение свойств</h3>
+            <pre><code>
+var user = {
+  name: "Вася",
+  age: 25,
+  window: window
+};
+
+console.log( JSON.stringify(user) ); // ошибка
+            </code></pre>
+            <pre class="fragment"><code>
+var user = {
+  name: "Вася",
+  age: 25,
+  window: window
+};
+
+console.log( JSON.stringify(user, ["name", "age"]) );
+// {"name":"Вася","age":25}
+            </code></pre>
+            <pre class="fragment"><code>
+var user = {
+  name: "Вася",
+  age: 25,
+  window: window
+};
+
+var str = JSON.stringify(user, function(key, value) {
+  if (key == 'window') return undefined;
+  return value;
+});
+
+console.log( str ); // {"name":"Вася","age":25}
+            </code></pre>
+        </section>
+        <section>
+            <h3>Красивое форматирование</h3>
+            <pre><code>
+var user = {
+  name: "Вася",
+  age: 25,
+  roles: {
+    isAdmin: false,
+    isEditor: true
+  }
+};
+
+var str = JSON.stringify(user, "", 4);
+
+console.log( str );
+/* Результат -- красиво сериализованный объект:
+{
+    "name": "Вася",
+    "age": 25,
+    "roles": {
+        "isAdmin": false,
+        "isEditor": true
+    }
+}
+*/
+            </code></pre>
+        </section>
+
+<section>
+    <h1>AJAX</h1>
+</section>
+        <section>
+            <h3>AJAX - Asynchronous Javascript And Xml</h3>
+        </section>
+        <section>
+            <h3>XMLHttpRequest</h3>
+            <pre><code>
+var xhr = new XMLHttpRequest();
+
+xhr.open('GET', 'google.com', false);
+
+xhr.send();
+
+xhr.onreadystatechange = function() {
+    if (xhr.readyState === XMLHttpRequest.DONE) {
+
+        if (xhr.status != 200) {
+          // обработать ошибку
+          alert( xhr.status + ': ' + xhr.statusText ); // пример вывода: 404: Not Found
+        } else {
+          // вывести результат
+          alert( xhr.responseText ); // responseText -- текст ответа.
+        }
+    }
+}
+            </code></pre>
+        </section>
+        <section>
+            <h3>AJAX - Asynchronous Javascript And Xml</h3>
+            <pre><code>
+xhr.setRequestHeader('X-Auth', '123');
+xhr.setRequestHeader('X-Auth', '456');
+
+// в результате будет заголовок:
+// X-Auth: 123, 456
+            </code></pre>
+        </section>
+        <section>
+            <h3>AJAX jQuery</h3>
+            <pre><code>
+$.ajax({
+  method: "POST",
+  url: "some.php",
+  data: { name: "John", location: "Boston" }
+})
+  .done(function( msg ) {
+    alert( "Data Saved: " + msg );
+  });
+            </code></pre>
+            <pre><code>
+$.get( "ajax/test.html", function( data ) {
+  $( ".result" ).html( data );
+  alert( "Load was performed." );
+});
+            </code></pre>
+        </section>
+        <section>
+            <h1>JSONP</h1>
+        </section>
+        <section>
+            <h3>JSONP - JSON with padding</h3>
+        </section>
+        <section>
+           <pre><code>
+function w3r_callback(data){
+console.log(data);
+}
+            </code></pre>
+            <pre class="fragment"><code>
+< script src="http://www.example.com?q=w3r_callback" />
+            </code></pre>
+            <pre class="fragment"><code>
+w3r_callback({
+"FirstName" : "xyz",
+"LastName" : "abc",
+"Grade" : "A"
+}
+);            </code></pre>
+        </section>
+        <section>
+            Access-Control-Allow-Origin: *
+        </section>
+        <section style="text-align: left;">
+            <h1>КОНЕЦ</h1>
+
+            <p>
+                - <a href="https://github.com/dselkirk/ajax">Source</a>
+            </p>
+        </section>
+
+    </div>
+
+</div>
+
+<script src="bower_components/reveal.js/lib/js/head.min.js"></script>
+<script src="bower_components/reveal.js/js/reveal.js"></script>
+
+<script>
+
+    // Full list of configuration options available at:
+    // https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        transition: 'concave', // none/fade/slide/convex/concave/zoom
+
+        // Optional reveal.js plugins
+        dependencies: [
+            {
+                src: 'bower_components/reveal.js/lib/js/classList.js', condition: function () {
+                return !document.body.classList;
+            }
+            },
+            {
+                src: 'bower_components/reveal.js/plugin/markdown/marked.js', condition: function () {
+                return !!document.querySelector('[data-markdown]');
+            }
+            },
+            {
+                src: 'bower_components/reveal.js/plugin/markdown/markdown.js', condition: function () {
+                return !!document.querySelector('[data-markdown]');
+            }
+            },
+            {
+                src: 'bower_components/reveal.js/plugin/highlight/highlight.js', async: true, condition: function () {
+                return !!document.querySelector('pre code');
+            }, callback: function () {
+                hljs.initHighlightingOnLoad();
+            }
+            },
+            {src: 'bower_components/reveal.js/plugin/zoom-js/zoom.js', async: true},
+            {src: 'bower_components/reveal.js/plugin/notes/notes.js', async: true}
+        ]
+    });
+
+</script>
+
+</body>
+</html>
